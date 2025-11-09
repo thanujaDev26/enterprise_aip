@@ -45,7 +45,7 @@ public class AssetController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/by-project/{projectCode}")
+    @GetMapping(value = "/by-project/{projectCode}", produces = "application/json")
     public ResponseEntity<PageResponse<AssetResponse>> listByProject(
             @PathVariable String projectCode,
             @RequestParam(defaultValue = "0") int page,
@@ -53,7 +53,7 @@ public class AssetController {
             @RequestParam(defaultValue = "name,asc") String sort
     ){
         String[] s = sort.split(",");
-        Sort.Direction dir = (s.length > 1 && "desc".equalsIgnoreCase(s[0])) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort.Direction dir = (s.length > 1 && "desc".equalsIgnoreCase(s[1])) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, s[0]));
         return ResponseEntity.ok(assetService.listByProject(projectCode, pageable));
     }
