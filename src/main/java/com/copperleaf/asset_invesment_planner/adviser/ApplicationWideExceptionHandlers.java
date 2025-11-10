@@ -1,6 +1,7 @@
 package com.copperleaf.asset_invesment_planner.adviser;
 
 import com.copperleaf.asset_invesment_planner.exception.AssetNotFoundException;
+import com.copperleaf.asset_invesment_planner.exception.AuthenticationException;
 import com.copperleaf.asset_invesment_planner.exception.ProjectNotFoundException;
 import com.copperleaf.asset_invesment_planner.util.StandardResponse;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,15 @@ public class ApplicationWideExceptionHandlers {
                 new StandardResponse(
                         404, ex.getMessage(), null
                 ), HttpStatus.NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<StandardResponse> authenticationExceptionHandler(RuntimeException ex){
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        403, ex.getMessage(), null
+                ),HttpStatus.FORBIDDEN
         );
     }
 }
