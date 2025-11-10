@@ -114,7 +114,7 @@ public class AssetDecisionServiceImpl implements AssetDecisionService {
 
     private double score(AssetPriorityResponse a, double wH, double wR, double wC) {
         double hN = 1.0 - clamp01((a.getHealthIndex() == null ? 100 : a.getHealthIndex()) / 100.0);
-        double roiN = clamp01(a.getRoi() / 2.0); // cap extreme ROI at 2x
+        double roiN = clamp01(a.getRoi() / 2.0);
         double costN = 1.0 - clamp01(a.getReplacementCost().doubleValue() / 2_000_000d); // normalize by 2M
         return wH * hN + wR * roiN + wC * costN;
     }

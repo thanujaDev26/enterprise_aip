@@ -6,6 +6,7 @@ import com.copperleaf.asset_invesment_planner.dto.ProjectResponse;
 import com.copperleaf.asset_invesment_planner.dto.ProjectUpdateRequest;
 import com.copperleaf.asset_invesment_planner.entity.Project;
 import com.copperleaf.asset_invesment_planner.entity.enums.ProjectStatus;
+import com.copperleaf.asset_invesment_planner.exception.ProjectNotFoundException;
 import com.copperleaf.asset_invesment_planner.repository.ProjectRepository;
 import com.copperleaf.asset_invesment_planner.service.ProjectService;
 import com.copperleaf.asset_invesment_planner.util.mapper.ProjectMapper;
@@ -29,7 +30,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponse create(ProjectCreateRequest dto) {
         if(projectRepository.existsByCode(dto.getCode())){
-            throw new RuntimeException("Project code already exists: " + dto.getCode());
+            throw new ProjectNotFoundException("Project code already exists: " + dto.getCode());
         }
         Project project = projectMapper.toEntity(dto);
         projectRepository.save(project);
@@ -38,7 +39,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse update(String code, ProjectUpdateRequest dto) {
-        Project project = projectRepository.findByCode(code).orElseThrow(() -> new RuntimeException("Project code not exists: " + code));
+        Project project = projectRepository.findByCode(code).orElseThrow(() -> new ProjectNotFoundException("Project code not exists: " + code));
         projectMapper.mapUpdates(dto, project);
         projectRepository.save(project);
         return projectMapper.toResponse(project);
@@ -46,13 +47,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getByCode(String code) {
-        Project project =  projectRepository.findByCode(code).orElseThrow(() -> new RuntimeException("Project code not exists: " + code));
+        Project project =  projectRepository.findByCode(code).orElseThrow(() -> new ProjectNotFoundException("Project code not exists: " + code));
         return projectMapper.toResponse(project);
     }
 
     @Override
     public void deleteByCOde(String code) {
-        Project project =  projectRepository.findByCode(code).orElseThrow(() -> new RuntimeException("Project code not exists: " + code));
+        Project project =  projectRepository.findByCode(code).orElseThrow(() -> new ProjectNotFoundException("Project code not exists: " + code));
         projectRepository.delete(project);
     }
 

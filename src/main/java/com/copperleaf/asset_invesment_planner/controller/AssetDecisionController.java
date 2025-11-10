@@ -6,8 +6,10 @@ import com.copperleaf.asset_invesment_planner.dto.AssetOptimizeResponse;
 import com.copperleaf.asset_invesment_planner.dto.AssetPrioritizeRequest;
 import com.copperleaf.asset_invesment_planner.dto.AssetPriorityResponse;
 import com.copperleaf.asset_invesment_planner.service.AssetDecisionService;
+import com.copperleaf.asset_invesment_planner.util.StandardResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,19 +27,37 @@ public class AssetDecisionController {
     }
 
     @PostMapping("/prioritize")
-    public ResponseEntity<List<AssetPriorityResponse>> prioritizeAll(@Valid @RequestBody AssetPrioritizeRequest dto) {
-        return ResponseEntity.ok(assetDecisionService.prioritize(null, dto));
+    public ResponseEntity<StandardResponse> prioritizeAll(@Valid @RequestBody AssetPrioritizeRequest dto) {
+//        return ResponseEntity.ok(assetDecisionService.prioritize(null, dto));
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        200, "Assets have been prioritized and sent back to the client",
+                        assetDecisionService.prioritize(null, dto)
+                ), HttpStatus.OK
+        );
     }
 
     @PostMapping("/prioritize/{projectCode}")
-    public ResponseEntity<List<AssetPriorityResponse>> prioritizeForProject(
+    public ResponseEntity<StandardResponse> prioritizeForProject(
             @PathVariable String projectCode, @Valid @RequestBody AssetPrioritizeRequest dto
     ){
-        return ResponseEntity.ok(assetDecisionService.prioritize(projectCode, dto));
+//        return ResponseEntity.ok(assetDecisionService.prioritize(projectCode, dto));
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        200, "Assets have been prioritized by projecrwise and sent back to the server",
+                        assetDecisionService.prioritize(projectCode,dto)
+                ), HttpStatus.OK
+        );
     }
 
     @PostMapping("/optimize")
-    public ResponseEntity<AssetOptimizeResponse> optimize(@Valid @RequestBody AssetOptimizeRequest dto){
-        return ResponseEntity.ok(assetDecisionService.optimize(dto));
+    public ResponseEntity<StandardResponse> optimize(@Valid @RequestBody AssetOptimizeRequest dto){
+//        return ResponseEntity.ok(assetDecisionService.optimize(dto));
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        200, "Assets have been optimized",
+                        assetDecisionService.optimize(dto)
+                ), HttpStatus.OK
+        );
     }
 }

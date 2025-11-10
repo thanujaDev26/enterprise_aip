@@ -5,15 +5,15 @@ import com.copperleaf.asset_invesment_planner.dto.PageResponse;
 import com.copperleaf.asset_invesment_planner.dto.ProjectCreateRequest;
 import com.copperleaf.asset_invesment_planner.dto.ProjectResponse;
 import com.copperleaf.asset_invesment_planner.dto.ProjectUpdateRequest;
-import com.copperleaf.asset_invesment_planner.entity.Project;
 import com.copperleaf.asset_invesment_planner.entity.enums.ProjectStatus;
 import com.copperleaf.asset_invesment_planner.service.ProjectService;
+import com.copperleaf.asset_invesment_planner.util.StandardResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,28 +29,48 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody ProjectCreateRequest dto) {
-        return ResponseEntity.ok(projectService.create(dto));
+    public ResponseEntity<StandardResponse> create(@Valid @RequestBody ProjectCreateRequest dto) {
+//        return ResponseEntity.ok(projectService.create(dto));
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        201, "Project has been created", projectService.create(dto)
+                ), HttpStatus.CREATED
+        );
     }
 
     @PutMapping("/{code}")
-    public ResponseEntity<ProjectResponse> update(@PathVariable String code, @Valid @RequestBody ProjectUpdateRequest dto) {
-        return ResponseEntity.ok(projectService.update(code, dto));
+    public ResponseEntity<StandardResponse> update(@PathVariable String code, @Valid @RequestBody ProjectUpdateRequest dto) {
+//        return ResponseEntity.ok(projectService.update(code, dto));
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        200, "Project has been updated", projectService.update(code, dto)
+                ), HttpStatus.OK
+        );
     }
 
     @GetMapping("/{code}")
-    public ResponseEntity<ProjectResponse> get(@PathVariable String code) {
-        return ResponseEntity.ok(projectService.getByCode(code));
+    public ResponseEntity<StandardResponse> get(@PathVariable String code) {
+//        return ResponseEntity.ok(projectService.getByCode(code));
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        200, "Project has been fetched", projectService.getByCode(code)
+                ), HttpStatus.OK
+        );
     }
 
     @DeleteMapping("/{code}")
-    public ResponseEntity<Void>  delete(@PathVariable String code) {
+    public ResponseEntity<StandardResponse>  delete(@PathVariable String code) {
         projectService.deleteByCOde(code);
-        return ResponseEntity.noContent().build();
+//        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        204, "Project has been removed", null
+                ),HttpStatus.NO_CONTENT
+        );
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<ProjectResponse>> search(
+    public ResponseEntity<StandardResponse> search(
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -59,6 +79,11 @@ public class ProjectController {
         String[] s = sort.split(",");
         Sort.Direction dir = (s.length > 1 && "desc".equalsIgnoreCase(s[1])) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, s[0]));
-        return ResponseEntity.ok(projectService.search(status, pageable));
+//        return ResponseEntity.ok(projectService.search(status, pageable));
+        return new ResponseEntity<>(
+                new StandardResponse(
+                        200, "Search result has been fetched", projectService.search(status, pageable)
+                ), HttpStatus.OK
+        );
     }
 }

@@ -3,6 +3,8 @@ package com.copperleaf.asset_invesment_planner.service.impl;
 import com.copperleaf.asset_invesment_planner.dto.*;
 import com.copperleaf.asset_invesment_planner.entity.Asset;
 import com.copperleaf.asset_invesment_planner.entity.Project;
+import com.copperleaf.asset_invesment_planner.exception.AssetNotFoundException;
+import com.copperleaf.asset_invesment_planner.exception.ProjectNotFoundException;
 import com.copperleaf.asset_invesment_planner.repository.AssetRepository;
 import com.copperleaf.asset_invesment_planner.repository.ProjectRepository;
 import com.copperleaf.asset_invesment_planner.service.AssetService;
@@ -34,7 +36,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public AssetResponse create(AssetCreateRequest dto) {
         Project project = this.projectRepository.findByCode(dto.getProjectCode())
-                .orElseThrow(()-> new RuntimeException("Project not found: " +  dto.getProjectCode()));
+                .orElseThrow(()-> new ProjectNotFoundException("Project not found: " +  dto.getProjectCode()));
         Asset saved = this.assetRepository.save(this.assetMapper.toEntity(dto, project));
         return assetMapper.toResponse(saved);
     }
@@ -42,7 +44,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public AssetResponse update(Long id, AssetUpdateRequest dto) {
         Asset asset = assetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Asset not found: " + id));
+                .orElseThrow(() -> new AssetNotFoundException("Asset not found: " + id));
 
         assetMapper.mapUpdates(dto, asset);
         return assetMapper.toResponse(asset);
@@ -50,12 +52,12 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AssetResponse get(Long id) {
-        return assetMapper.toResponse(this.assetRepository.findById(id).orElseThrow(()-> new RuntimeException("Asset not found: " +  id)));
+        return assetMapper.toResponse(this.assetRepository.findById(id).orElseThrow(()-> new AssetNotFoundException("Asset not found: " +  id)));
     }
 
     @Override
     public void delete(Long id) {
-        Asset asset =  this.assetRepository.findById(id).orElseThrow(()-> new RuntimeException("Asset not found: " +  id));
+        Asset asset =  this.assetRepository.findById(id).orElseThrow(()-> new AssetNotFoundException("Asset not found: " +  id));
         this.assetRepository.delete(asset);
     }
 
@@ -72,7 +74,7 @@ public class AssetServiceImpl implements AssetService {
     public ProjectAssetsSummaryResponse summarize(String projectCode) {
 
         Project project = this.projectRepository.findByCode(projectCode)
-                .orElseThrow(()-> new RuntimeException("Project not found: " +  projectCode));
+                .orElseThrow(()-> new ProjectNotFoundException("Project not found: " +  projectCode));
 
         var assets = assetRepository.findByProject_Code(projectCode, Pageable.unpaged()).getContent();
 
