@@ -123,6 +123,48 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+<!--		<dependency>-->
+<!--			<groupId>com.oracle.database.jdbc</groupId>-->
+<!--			<artifactId>ojdbc11</artifactId>-->
+<!--			<version>23.7.0.25.01</version>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>com.oracle.database.jdbc</groupId>-->
+<!--			<artifactId>ucp</artifactId>-->
+<!--			<version>23.7.0.25.01</version>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>com.oracle.database.ha</groupId>-->
+<!--			<artifactId>simplefan</artifactId>-->
+<!--			<version>23.3.0.23.09</version>-->
+<!--		</dependency>-->
+
+		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<version>21.7.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.oracle.database.security</groupId>
+			<artifactId>oraclepki</artifactId>
+			<version>21.7.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.oracle.database.security</groupId>
+			<artifactId>osdt_cert</artifactId>
+			<version>21.7.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.oracle.database.security</groupId>
+			<artifactId>osdt_core</artifactId>
+			<version>21.7.0.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

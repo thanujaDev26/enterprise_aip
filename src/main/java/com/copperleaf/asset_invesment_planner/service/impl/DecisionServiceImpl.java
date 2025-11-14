@@ -15,9 +15,14 @@ import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.reverse;
 
 
 @Service
@@ -76,13 +81,17 @@ public class DecisionServiceImpl implements DecisionService {
     }
 
 
-    private java.util.List<ProjectPriorityResponse> knapsackProjects(
-            java.util.List<ProjectPriorityResponse> items, java.math.BigDecimal remaining) {
+    private List<ProjectPriorityResponse> knapsackProjects(
+            List<ProjectPriorityResponse> items, BigDecimal remaining) {
 
-        java.math.BigDecimal unit = new java.math.BigDecimal("100000");
-        int capacity = remaining.divide(unit, 0, java.math.RoundingMode.DOWN).intValue();
+        BigDecimal unit = new BigDecimal("100000");
+        int capacity = remaining.divide(unit, 0, RoundingMode.DOWN).intValue();
         int n = items.size();
-        int[] w = items.stream().map(b -> b.getApprovedBudget().divide(unit, 0, java.math.RoundingMode.UP).intValue()).mapToInt(Integer::intValue).toArray();
+        int[] w = items.stream().map(
+                b -> b.getApprovedBudget()
+                        .divide(unit, 0, RoundingMode.UP).intValue())
+                .mapToInt(Integer::intValue)
+                .toArray();
         double[] v = items.stream().mapToDouble(ProjectPriorityResponse::getScore).toArray();
 
         double[][] dp = new double[n+1][capacity+1];
@@ -95,31 +104,31 @@ public class DecisionServiceImpl implements DecisionService {
             }
         }
         int c = capacity;
-        java.util.List<ProjectPriorityResponse> picked = new java.util.ArrayList<>();
+        List<ProjectPriorityResponse> picked = new java.util.ArrayList<>();
         for (int i=n;i>=1;i--){
             if (take[i][c]) { picked.add(items.get(i-1)); c -= w[i-1]; }
         }
-        java.util.Collections.reverse(picked);
+        reverse(picked);
         return picked;
     }
 
-    private java.util.List<ProjectPriorityResponse> enforceProjectDependencies(
-            java.util.List<ProjectPriorityResponse> picked,
-            java.util.Map<String, ProjectPriorityResponse> universe,
-            java.util.Map<String, java.util.List<String>> depends,
-            java.math.BigDecimal cap) {
+    private List<ProjectPriorityResponse> enforceProjectDependencies(
+            List<ProjectPriorityResponse> picked,
+            Map<String, ProjectPriorityResponse> universe,
+            Map<String, List<String>> depends,
+            BigDecimal cap) {
 
         var set = new java.util.LinkedHashMap<String, ProjectPriorityResponse>();
         for (var p : picked) set.put(p.getProjectCode(), p);
 
-        java.math.BigDecimal current = picked.stream().map(ProjectPriorityResponse::getApprovedBudget)
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        BigDecimal current = picked.stream().map(ProjectPriorityResponse::getApprovedBudget)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         boolean changed;
         do {
             changed = false;
-            for (var entry : new java.util.ArrayList<>(set.values())) {
-                var requires = depends.getOrDefault(entry.getProjectCode(), java.util.List.of());
+            for (var entry : new ArrayList<>(set.values())) {
+                var requires = depends.getOrDefault(entry.getProjectCode(), List.of());
                 for (String dep : requires) {
                     if (!set.containsKey(dep) && universe.containsKey(dep)) {
                         var cand = universe.get(dep);
@@ -136,7 +145,7 @@ public class DecisionServiceImpl implements DecisionService {
             }
         } while (changed);
 
-        return new java.util.ArrayList<>(set.values());
+        return new ArrayList<>(set.values());
     }
 
 
@@ -174,7 +183,7 @@ public class DecisionServiceImpl implements DecisionService {
                 .map(p -> computeKpi(p, useForecast, alpha))
                 .toList();
 
-        var excluded = new java.util.HashSet<>(req.getMustExclude()==null?java.util.List.<String>of():req.getMustExclude());
+        var excluded = new java.util.HashSet<>(req.getMustExclude()==null? List.<String>of():req.getMustExclude());
         var items = all.stream().filter(k -> !excluded.contains(k.getProjectCode())).toList();
 
         for (var k : items)
@@ -182,11 +191,11 @@ public class DecisionServiceImpl implements DecisionService {
 
         var byCode = items.stream().collect(java.util.stream.Collectors.toMap(ProjectPriorityResponse::getProjectCode, x->x));
 
-        java.util.List<ProjectPriorityResponse> picked = new java.util.ArrayList<>();
-        java.math.BigDecimal cap = req.getBudgetCap()==null?java.math.BigDecimal.ZERO:req.getBudgetCap();
-        java.math.BigDecimal remaining = cap;
+        List<ProjectPriorityResponse> picked = new ArrayList<>();
+        BigDecimal cap = req.getBudgetCap()==null? BigDecimal.ZERO:req.getBudgetCap();
+        BigDecimal remaining = cap;
 
-        var must = req.getMustInclude()==null?java.util.List.<String>of():req.getMustInclude();
+        var must = req.getMustInclude()==null? List.<String>of():req.getMustInclude();
         for (String code : must) {
             var k = byCode.get(code);
             if (k != null && k.getApprovedBudget().compareTo(remaining) <= 0) {
@@ -195,7 +204,7 @@ public class DecisionServiceImpl implements DecisionService {
             }
         }
 
-        java.util.Map<String, java.util.List<String>> depends = req.getDependsOn()==null?java.util.Map.of():req.getDependsOn();
+        Map<String, List<String>> depends = req.getDependsOn()== null?Map.of():req.getDependsOn();
 
         var pickedCodes = picked.stream()
                 .map(ProjectPriorityResponse::getProjectCode)
@@ -213,7 +222,7 @@ public class DecisionServiceImpl implements DecisionService {
         var resp = new OptimizePortfolioResponse();
         resp.setBudgetCap(cap);
         var total = picked.stream().map(ProjectPriorityResponse::getApprovedBudget)
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         resp.setTotalSelectedBudget(total);
         resp.setTotalScore(picked.stream().mapToDouble(ProjectPriorityResponse::getScore).sum());
         resp.setSelectedProjects(picked);
